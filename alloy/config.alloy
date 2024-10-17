@@ -28,8 +28,8 @@ otelcol.receiver.otlp "otlp_receiver" {
         endpoint = "0.0.0.0:4318"
     }
     output {
-        logs = [otelcol.processor.batch.default.input]
-        traces = [otelcol.processor.batch.default.input]
+        logs    = [otelcol.processor.batch.default.input]
+        traces  = [otelcol.processor.batch.default.input]
         metrics = [otelcol.processor.batch.default.input]
     }
 }
@@ -39,9 +39,9 @@ otelcol.processor.batch "default" {
     send_batch_max_size = 16384
     timeout = "2s"
     output {
-        traces = [otelcol.exporter.otlp.tempo.input]
-        logs = [otelcol.exporter.loki.default.input]
-        // metrics = [prometheus.remote_write.mimir.receiver]
+        traces  = [otelcol.exporter.otlp.tempo.input]
+        logs    = [otelcol.exporter.loki.default.input]
+        metrics = [otelcol.exporter.prometheus.mimir.input]
     }
 }
 
@@ -69,6 +69,10 @@ loki.write "autologging" {
             password = json_path(local.file.endpoints.content, ".logs.basicAuth.password")[0]
         }
     }
+}
+
+otelcol.exporter.prometheus "mimir" {
+    forward_to = [prometheus.remote_write.mimir.receiver]
 }
 
 // Metrics Exporter to Mimir
